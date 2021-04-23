@@ -10,57 +10,14 @@ import sys
 from PIL import Image
 import json 
 
+from audioTools import getSpectro
+
 searchDir = "data/"
 M = 1024 
 
 def root_mean_squared_error(y_true, y_pred):
             return K.sqrt(K.mean(K.square(y_pred - y_true))) 
         
-def getSpectro(audioData):
-    #We create a 3D tensor using 3 type of feature 
-    #Mel spectrogram 
-
-    
-    audioData = librosa.util.normalize(audioData)
-    stft = np.abs(librosa.core.stft(audioData)) ** 2 #Make spectro once so we don't have to recompute it
-
-
-    #Mel spectrogram 
-    melSpec = librosa.feature.melspectrogram(S = stft)
-    mfcc    = librosa.feature.mfcc(S = stft)
-    chroma  = librosa.feature.chroma_stft(S = stft)
-
-    #Grab a random start idx to slice the array
-    #TODO: Figure out a way to get a M length feature by cutting audioData directly
-    idxSection = int(np.random.uniform(0, melSpec.shape[1] - M))
-
-    melSpec = melSpec[:, idxSection:idxSection + M]
-    mfcc    = mfcc[:, idxSection:idxSection + M]
-    chroma  = chroma[:, idxSection:idxSection + M]
-
-    melSpec = np.log(melSpec + 1e-9)
-        
-    melSpec = librosa.util.normalize(melSpec)
-    mfcc    = librosa.util.normalize(mfcc)
-    chroma  = librosa.util.normalize(chroma)
-
-    #Pad to fit the shape of melSpec
-    mfcc    = np.pad(mfcc, pad_width=((0, 108), (0, 0)))
-    chroma  = np.pad(chroma, pad_width=((0, 116), (0, 0)))[:, :M]
-    
-    #add axis to concatenate
-    chroma  = np.expand_dims(chroma, axis = 0)
-
-
-    #Stack it up into a 3D Matrix
-    S = np.stack((melSpec, mfcc))
-    S = np.concatenate((S, chroma))
-    S = np.swapaxes(S, 0, 2)
-    S = np.expand_dims(S, axis=0)
-
-    
-    return S
-
 def getDanceability(times, bpm):
     #Get the danceability of a song out of the onset strength of the beat
     #https://www.researchgate.net/publication/324672216_Score_Formulation_and_Parametric_Synthesis_of_Musical_Track_as_a_Platform_for_Big_Data_in_Hit_Prediction
@@ -88,7 +45,7 @@ for i, song in enumerate(musicFiles):
     audioData, sr = af.read(song) 
     audioData = audioData[0, :]#Get mono
 
-    spectro = getSpectro(audioData)
+    spectro = getSpectro(song, M)
     embed = model.predict(spectro)
     embed = embed.flatten()
     print(spectro[0, :, :, 0].shape)
