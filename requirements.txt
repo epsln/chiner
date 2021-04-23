@@ -1,0 +1,10 @@
+librosa==0.8.0
+pydub==0.24.1
+audiofile==0.4.1
+scipy==1.6.0
+scikit_image==0.18.1
+tensorflow_gpu==2.4.0
+numpy==1.19.5
+Pillow==8.2.0
+skimage==0.0
+tensorflow==2.4.1
