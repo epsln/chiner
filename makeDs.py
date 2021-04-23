@@ -4,7 +4,7 @@ import numpy as np
 import librosa
 import audiofile as af
 
-from audioTools import getSpectro
+from utils.audioTools import getSpectro
 
 dsName = "ds"
 

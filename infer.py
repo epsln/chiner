@@ -10,7 +10,7 @@ import sys
 from PIL import Image
 import json 
 
-from audioTools import getSpectro
+from utils.audioTools import getSpectro
 
 searchDir = "data/"
 M = 1024 
