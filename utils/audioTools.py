@@ -1,4 +1,5 @@
 import librosa 
+import numpy as np
 def getSpectro(song, M):
     #Get a sprectrogram out of a mp3
     audioData, sr = librosa.load(song) 
@@ -36,3 +37,4 @@ def getSpectro(song, M):
     S = np.concatenate((S, chroma))
     S = np.swapaxes(S, 0, 2)
 
+    return S
