@@ -1,4 +1,7 @@
 __pycache__/
+utils/__pycache__/
+utils/__pycache__
+test/__init__.py
 data/
 ds/
 ideas.md
