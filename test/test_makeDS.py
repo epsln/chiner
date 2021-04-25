@@ -3,12 +3,15 @@ import random
 import os
 import numpy as np
 
+import configparser
 from utils import audioTools
 
-#Get this from a config file
-fftLength = 4096
-nFreq = 128
-numFeatures = 3
+config = configparser.ConfigParser()
+config.read(r'config.cfg')
+fftLength = int(config.get('Dataset', 'fftLength'))
+nFreq = int(config.get('Dataset', 'nFreq')) 
+numFeatures = int(config.get('Dataset', 'numFeatures'))
+
 musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk("data/") for name in files] 
 
 spectro = audioTools.getSpectro(random.choice(musicFiles), fftLength)
