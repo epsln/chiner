@@ -10,10 +10,9 @@ import sys
 from PIL import Image
 import json 
 
-from utils.audioTools import getSpectro
+import configparser
 
-searchDir = "data/"
-M = 1024 
+from utils.audioTools import getSpectro
 
 def root_mean_squared_error(y_true, y_pred):
             return K.sqrt(K.mean(K.square(y_pred - y_true))) 
@@ -27,48 +26,52 @@ def getDanceability(times, bpm):
             danceability += bpm * val 
     return danceability 
 
+def main():
+    config = configparser.ConfigParser()
+    config.read(r'config.cfg')
+    #TODO: If modelName is empty, grab the latest (highest ts)
+    modelName = config.get('Model', 'name')
+    fftLength = int(config.get('Dataset', 'fftLength'))
+    nFreq = int(config.get('Dataset', 'nFreq')) 
+    numFeatures = int(config.get('Dataset', 'numFeatures'))
+    dbName = config.get('Database', 'name')
+    searchDir = config.get('Database', 'searchDir') 
+    saveDir = config.get('Database', 'directory') 
 
-model = keras.models.load_model('models/test', custom_objects={'root_mean_squared_error': root_mean_squared_error})
-model.summary()
+    model = keras.models.load_model('models/' + modelName, custom_objects={'root_mean_squared_error': root_mean_squared_error})
+    model.summary()
 
-musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk(searchDir) for name in files] 
+    musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk(searchDir) for name in files] 
 
-outArr = []
+    outArr = []
 
-jsonFile = open('test.json', 'w+')
-for i, song in enumerate(musicFiles):
-    print("Analyzing " +os.path.basename(song))
-    #if os.stat("test.json").st_size > 0 and song in next((songAnalyzed for songAnalyzed in jsonFile if songAnalyzed["path"] == song), None) is not None:
-    #     #If the song has already been analyzed, don't do it again
-    #    continue
+    jsonFile = open(dbName + '.json', 'w+')
+    for i, song in enumerate(musicFiles):
+        print("Analyzing " +os.path.basename(song))
+        #if os.stat("test.json").st_size > 0 and song in next((songAnalyzed for songAnalyzed in jsonFile if songAnalyzed["path"] == song), None) is not None:
+        #     #If the song has already been analyzed, don't do it again
+        #    continue
 
-    audioData, sr = af.read(song) 
-    audioData = audioData[0, :]#Get mono
+        audioData, sr = af.read(song) 
+        audioData = audioData[0, :]#Get mono
 
-    spectro = getSpectro(song, M)
-    embed = model.predict(spectro)
-    embed = embed.flatten()
-    print(spectro[0, :, :, 0].shape)
-    a = spectro[0, :, :, 0] * 255
-    img = Image.fromarray(a)
-    img = img.convert("L")
-    img.save("spec.png")
-    a = np.reshape(embed, (M, 128, 3))
-    img = Image.fromarray(a[:,:,0] * 255)
-    img = img.convert("L")
-    img.save("embed.png")
-    break
-    onset_env = librosa.onset.onset_strength(audioData, sr)
-    bpm = librosa.beat.tempo(onset_envelope = onset_env, sr = sr)[0]
-    times = librosa.times_like(onset_env, sr=sr)
-    danceability = getDanceability(times, bpm) 
+        spectro = getSpectro(song, fftLength)
+        spectro = np.expand_dims(spectro, axis = 0)
+        embed = model.predict(spectro)
+        embed = embed.flatten()
+        onset_env = librosa.onset.onset_strength(audioData, sr)
+        bpm = librosa.beat.tempo(onset_envelope = onset_env, sr = sr)[0]
+        times = librosa.times_like(onset_env, sr=sr)
+        danceability = getDanceability(times, bpm) 
 
-    row = {"path": searchDir + song,
-            "bpm": bpm,
-            "danceability": danceability,
-           "embed": embed.tolist()}
-    outArr.append(row)
-    print("[",i + 1,"/",len(musicFiles), "]")
+        row = {"path": searchDir + song,
+                "bpm": bpm,
+                "danceability": danceability,
+               "embed": embed.tolist()}
+        outArr.append(row)
+        print("[",i + 1,"/",len(musicFiles), "]")
 
-json.dump(outArr, jsonFile)
+    json.dump(outArr, jsonFile)
 
+if __name__ == "__main__":
+    main()
