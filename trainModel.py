@@ -30,6 +30,7 @@ numFeatures = int(config.get('Dataset', 'numFeatures'))
 batchSize = int(config.get('Model', 'batchSize'))
 numEpochs = int(config.get('Model', 'epochs'))
 modelName = config.get('Model', 'name')
+
 if not modelName:
     ts = calendar.timegm(time.gmtime())
     modelName = "autocnn_"+str(ts)
@@ -94,8 +95,7 @@ def main():
 
     modelSave = keras.Model(model.input,model.get_layer('max_pooling2d_2').output)
     #Save model somewhere
-    #modelSave.save("models/" + modelName)
-    model.save("models/" + "test")
+    modelSave.save("models/" + modelName)
     #Test and save it in file
     results = model.evaluate(x = trainGen, batch_size = batchSize, steps = len(trainFiles)/batchSize)
     with open('results.txt', 'a') as f:
