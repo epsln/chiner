@@ -1,9 +1,12 @@
 import librosa 
 import numpy as np
-def getSpectro(song, M):
+import scipy.io.wavfile
+
+def getSpectro(song, M, audioData = []):
     #Get a sprectrogram out of a mp3
-    audioData, sr = librosa.load(song) 
-    audioData = librosa.util.normalize(audioData)
+    if audioData == []:
+        audioData, sr = librosa.load(song, sr=None) 
+        audioData = librosa.util.normalize(audioData)
     stft = np.abs(librosa.core.stft(audioData)) ** 2 #Make spectro once so we don't have to recompute it
 
     #Mel spectrogram 

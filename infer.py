@@ -5,6 +5,7 @@ import pydub
 import audiofile as af
 import numpy as np
 import librosa
+import scipy.io.wavfile
 from skimage import util
 import sys
 from PIL import Image
@@ -52,10 +53,9 @@ def main():
         #     #If the song has already been analyzed, don't do it again
         #    continue
 
-        audioData, sr = af.read(song) 
-        audioData = audioData[0, :]#Get mono
+        audioData, sr = librosa.load(song, sr=None) 
 
-        spectro = getSpectro(song, fftLength)
+        spectro = getSpectro(song, fftLength, audioData)
         spectro = np.expand_dims(spectro, axis = 0)
         embed = model.predict(spectro)
         embed = embed.flatten()
