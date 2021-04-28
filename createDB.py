@@ -1,19 +1,17 @@
 from tensorflow import keras
 
 import os
-import pydub
-import audiofile as af
 import numpy as np
 import librosa
-import scipy.io.wavfile
 from skimage import util
 import sys
-from PIL import Image
 import json 
 
 import configparser
 
 from utils.audioTools import getSpectro
+
+debugFlag = False
 
 def root_mean_squared_error(y_true, y_pred):
             return K.sqrt(K.mean(K.square(y_pred - y_true))) 
@@ -29,7 +27,11 @@ def getDanceability(times, bpm):
 
 def main():
     config = configparser.ConfigParser()
-    config.read(r'config.cfg')
+    if debugFlag == True:
+        config.read(r'configTest.cfg')
+    else:
+        config.read(r'config.cfg')
+
     #TODO: If modelName is empty, grab the latest (highest ts)
     modelName = config.get('Model', 'name')
     fftLength = int(config.get('Dataset', 'fftLength'))
@@ -49,9 +51,9 @@ def main():
     jsonFile = open(dbName + '.json', 'w+')
     for i, song in enumerate(musicFiles):
         print("Analyzing " +os.path.basename(song))
-        #if os.stat("test.json").st_size > 0 and song in next((songAnalyzed for songAnalyzed in jsonFile if songAnalyzed["path"] == song), None) is not None:
-        #     #If the song has already been analyzed, don't do it again
-        #    continue
+        if os.stat("test.json").st_size > 0 and song in next((songAnalyzed for songAnalyzed in jsonFile if songAnalyzed["path"] == song), None) is not None:
+             #If the song has already been analyzed, don't do it again
+            continue
 
         audioData, sr = librosa.load(song, sr=None) 
 
@@ -64,12 +66,15 @@ def main():
         times = librosa.times_like(onset_env, sr=sr)
         danceability = getDanceability(times, bpm) 
 
-        row = {"path": searchDir + song,
+        row = {"path": song,
                 "bpm": bpm,
                 "danceability": danceability,
                "embed": embed.tolist()}
         outArr.append(row)
+
         print("[",i + 1,"/",len(musicFiles), "]")
+        if debugFlag == True:
+            break
 
     json.dump(outArr, jsonFile)
 
