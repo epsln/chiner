@@ -2,7 +2,9 @@ import json
 import numpy as np
 import random
 
-numTracks = 5
+import configparser
+
+debugFlag = False 
 
 def findClosest(currentTrack, data, alreadySeen):
     minDist = 10000000000
@@ -19,16 +21,33 @@ def findClosest(currentTrack, data, alreadySeen):
     return nextTrack 
 
 
-with open("test.json") as jsonFile:
-    data = json.load(jsonFile)
-jsonFile.close()
-
-currentTrack = random.choice(data)
-alreadySeen = []
-with open("test.m3u") as playlistFile:
-    for i in range(numTracks):
-        currentTrack = findClosest(currentTrack, data, alreadySeen)
-        alreadySeen.append(currentTrack)
-        print(currentTrack['path'])
+def loadData(dbName):
+    with open(dbName) as jsonFile:
+        data = json.load(jsonFile)
+    jsonFile.close()
+    return data
 
 
+def main():
+    config = configparser.ConfigParser()
+    if debugFlag == True:
+        config.read(r'configTest.cfg')
+    else:
+        config.read(r'config.cfg')
+
+    dbName = config.get('Database', 'name') + '.json'
+    saveDir = config.get('Playlist', 'directory') 
+    pName = config.get('Playlist', 'name')
+    numTracks = int(config.get('Playlist', 'duration'))
+
+    data = loadData(dbName)
+    currentTrack = random.choice(data)
+    alreadySeen = []
+    with open(pName + ".m3u", "w+") as playlistFile:
+        for i in range(numTracks):
+            currentTrack = findClosest(currentTrack, data, alreadySeen)
+            alreadySeen.append(currentTrack)
+            playlistFile.write(currentTrack['path'] + "\n")
+
+if __name__ == "__main__":
+    main()
