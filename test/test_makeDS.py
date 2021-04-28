@@ -2,32 +2,41 @@ import unittest
 import random
 import os
 import numpy as np
+import shutil
 
 import configparser
-from utils import audioTools
-
-config = configparser.ConfigParser()
-config.read(r'config.cfg')
-fftLength = int(config.get('Dataset', 'fftLength'))
-nFreq = int(config.get('Dataset', 'nFreq')) 
-numFeatures = int(config.get('Dataset', 'numFeatures'))
-
-musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk("data/") for name in files] 
-
-spectro = audioTools.getSpectro(random.choice(musicFiles), fftLength)
+import makeDS
 
 class testSpectro(unittest.TestCase):
 
-    def test_shape(self):
-        self.assertEqual(spectro.shape,(fftLength, nFreq, numFeatures))
+    @classmethod
+    def setUpClass(self):
+        self.config = configparser.ConfigParser()
+        self.config.read(r'configTest.cfg')
+        self.dsName = self.config.get('Dataset', 'name')
+        self.fftLength = int(self.config.get('Dataset', 'fftLength'))
+        self.nFreq = int(self.config.get('Dataset', 'nFreq')) 
+        self.numFeatures = int(self.config.get('Dataset', 'numFeatures'))
 
-    def test_type(self):
-        self.assertEqual(spectro.dtype, 'float32')
+        makeDS.debugFlag = True
+        makeDS.main()
 
-    def test_validVal(self):
-        #Check if there are invalid values by summing and checking if res is nan or inf
-        self.assertFalse(np.isnan(np.sum(spectro)))
-        self.assertFalse(np.isinf(np.sum(spectro)))
+    def test_dsExist(self):
+        self.assertTrue(os.path.exists(self.dsName))
+        self.assertTrue(os.path.exists(self.dsName + "/train/"))
+        self.assertTrue(os.path.exists(self.dsName + "/test/"))
+
+    def test_trainFilesExist(self):
+        self.trainFiles = [os.path.join(path, name) for path, subdirs, files in os.walk(self.dsName + "/train/") for name in files] 
+        self.assertFalse(len(self.trainFiles) == 0)
+
+    def test_testFilesExist(self):
+        self.testFiles = [os.path.join(path, name) for path, subdirs, files in os.walk(self.dsName + "/test/") for name in files] 
+        self.assertFalse(len(self.testFiles) == 0)
+
+    @classmethod
+    def tearDownClass(self):
+        shutil.rmtree(self.dsName)
 
 if __name__ == '__main__':
     unittest.main()

@@ -54,5 +54,6 @@ def main():
             np.save(dsName + "/test/"+os.path.basename(song)[:-4]+".npy", S)
             np.save(dsName + "/train/"+os.path.basename(song)[:-4]+".npy", S)
             return 0
+
 if __name__ == "__main__":
     main()
