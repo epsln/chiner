@@ -8,18 +8,25 @@ import configparser
 
 from utils.audioTools import getSpectro
 
-config = configparser.ConfigParser()
-config.read(r'config.cfg')
-dsName = config.get('Dataset', 'name')
-fftLength = int(config.get('Dataset', 'fftLength'))
-nFreq = int(config.get('Dataset', 'nFreq')) 
-numFeatures = int(config.get('Dataset', 'numFeatures'))
+debugFlag = False 
 
-
-#Might want to rename data to fit whatever user might want
-musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk("data/") for name in files] 
 
 def main():
+    config = configparser.ConfigParser()
+    if debugFlag == True:
+        config.read(r'configTest.cfg')
+    else:
+        config.read(r'config.cfg')
+
+    dsName = config.get('Dataset', 'name')
+    fftLength = int(config.get('Dataset', 'fftLength'))
+    nFreq = int(config.get('Dataset', 'nFreq')) 
+    numFeatures = int(config.get('Dataset', 'numFeatures'))
+
+
+
+    #Might want to rename data to fit whatever user might want
+    musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk("data/") for name in files] 
     #If folder already exist, quit
     if os.path.exists(dsName):
         print("ERROR:  The folder '" + dsName + "' already exists ! either delete it or rename it and try again")
@@ -32,16 +39,20 @@ def main():
          
     for i, song in enumerate(musicFiles):
 
-            S = getSpectro(song, fftLength)
-            #And save
-            if np.random.uniform(0, 1) > 0.8:
-                print("Saving " + dsName + "/test/"+os.path.basename(song)[:-4]+".npy")
-                print("[",i + 1,"/",len(musicFiles), "]")
-                np.save(dsName + "/test/"+os.path.basename(song)[:-4]+".npy", S)
-            else:
-                print("Saving " + dsName + "/train/"+os.path.basename(song)[:-4]+".npy")
-                print("[",i + 1,"/",len(musicFiles), "]")
-                np.save(dsName + "/train/"+os.path.basename(song)[:-4]+".npy", S)
-
+        S = getSpectro(song, fftLength)
+        #And save
+        if np.random.uniform(0, 1) > 0.8:
+            print("Saving " + dsName + "/test/"+os.path.basename(song)[:-4]+".npy")
+            print("[",i + 1,"/",len(musicFiles), "]")
+            np.save(dsName + "/test/"+os.path.basename(song)[:-4]+".npy", S)
+        else:
+            print("Saving " + dsName + "/train/"+os.path.basename(song)[:-4]+".npy")
+            print("[",i + 1,"/",len(musicFiles), "]")
+            np.save(dsName + "/train/"+os.path.basename(song)[:-4]+".npy", S)
+        
+        if (debugFlag == True):
+            np.save(dsName + "/test/"+os.path.basename(song)[:-4]+".npy", S)
+            np.save(dsName + "/train/"+os.path.basename(song)[:-4]+".npy", S)
+            return 0
 if __name__ == "__main__":
     main()
