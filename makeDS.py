@@ -10,7 +10,7 @@ from utils.audioTools import getSpectro
 
 config = configparser.ConfigParser()
 config.read(r'config.cfg')
-dsName = config.get('Dataset', 'dsName')
+dsName = config.get('Dataset', 'name')
 fftLength = int(config.get('Dataset', 'fftLength'))
 nFreq = int(config.get('Dataset', 'nFreq')) 
 numFeatures = int(config.get('Dataset', 'numFeatures'))
