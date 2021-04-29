@@ -6,7 +6,6 @@ import shutil
 
 import configparser
 import makePlaylist
-import createDB 
 
 
 class testPlaylist(unittest.TestCase):

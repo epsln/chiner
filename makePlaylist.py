@@ -1,12 +1,12 @@
 import json
 import numpy as np
 import random
-
+from scipy.spatial import distance
 import configparser
 
 debugFlag = False 
 
-def findClosest(currentTrack, data, alreadySeen):
+def findClosest(currentTrack, data, alreadySeen, distFun):
     minDist = 10000000
     for track in data:
         if track['path'] == currentTrack['path']: #skip if is the same as current
@@ -14,7 +14,7 @@ def findClosest(currentTrack, data, alreadySeen):
         
         currEmbed = np.array(currentTrack['embed']).flatten()
         testEmbed = np.array(track['embed']).flatten()
-        dist = np.linalg.norm(currEmbed- testEmbed) 
+        dist = distFun(currEmbed, testEmbed)
         if dist < minDist and track not in alreadySeen:
             minDist = dist
             nextTrack = track
@@ -39,14 +39,18 @@ def main():
     saveDir = config.get('Playlist', 'directory') 
     pName = config.get('Playlist', 'name')
     numTracks = int(config.get('Playlist', 'duration'))
-
+    similarityFun = config.get('Playlist', 'similarityFun')
+    if similarityFun == "L2":
+        distFun = distance.euclidean
+    if similarityFun == "cosine":
+        distFun = spatial.distance.cosine
 
     data = loadData(dbName)
     currentTrack = random.choice(data)
     alreadySeen = []
     with open(pName + ".m3u", "w+") as playlistFile:
         for i in range(numTracks):
-            currentTrack = findClosest(currentTrack, data, alreadySeen)
+            currentTrack = findClosest(currentTrack, data, alreadySeen, distFun)
             alreadySeen.append(currentTrack)
             playlistFile.write(currentTrack['path'] + "\n")
             #Empty already seen sometimes
