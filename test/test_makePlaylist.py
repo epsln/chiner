@@ -6,6 +6,7 @@ import shutil
 
 import configparser
 import makePlaylist
+import createDB 
 
 
 class testPlaylist(unittest.TestCase):
@@ -31,7 +32,7 @@ class testPlaylist(unittest.TestCase):
         playlistFile = open(self.playlistName, 'r')
         lines = playlistFile.readlines()
         for line in lines:
-            self.assertTrue(os.path.exists(line))
+            self.assertTrue(os.path.exists(line.replace('\n', '')))
         playlistFile.close()
 
     def test_numSong(self):
@@ -40,9 +41,10 @@ class testPlaylist(unittest.TestCase):
         numLines = sum(1 for line in open(self.playlistName))
         self.assertEqual(numLines, self.numSongs)
 
-    @classmethod
-    def tearDownClass(self):
-        os.rm(self.playlistName)
+#    @classmethod
+#    def tearDownClass(self):
+#        os.rm(self.dbName)
+#        os.rm(self.playlistName)
 
 if __name__ == '__main__':
     unittest.main()

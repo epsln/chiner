@@ -11,7 +11,7 @@ import configparser
 
 from utils.audioTools import getSpectro
 
-debugFlag = False
+debugFlag = True
 
 def root_mean_squared_error(y_true, y_pred):
             return K.sqrt(K.mean(K.square(y_pred - y_true))) 
@@ -48,8 +48,10 @@ def main():
 
     outArr = []
 
-    jsonFile = open(dbName + '.json', 'w+')
+    jsonFile = open(saveDir + dbName + '.json', 'w+')
     for i, song in enumerate(musicFiles):
+        if i > 3 and debugFlag == True:
+            break
         print("Analyzing " +os.path.basename(song))
         if os.stat("test.json").st_size > 0 and song in next((songAnalyzed for songAnalyzed in jsonFile if songAnalyzed["path"] == song), None) is not None:
              #If the song has already been analyzed, don't do it again
@@ -66,15 +68,13 @@ def main():
         times = librosa.times_like(onset_env, sr=sr)
         danceability = getDanceability(times, bpm) 
 
-        row = {"path": song,
+        row = {"path": os.path.abspath(song),
                 "bpm": bpm,
                 "danceability": danceability,
                "embed": embed.tolist()}
         outArr.append(row)
 
         print("[",i + 1,"/",len(musicFiles), "]")
-        if debugFlag == True:
-            break
 
     json.dump(outArr, jsonFile)
 

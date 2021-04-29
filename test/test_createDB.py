@@ -33,10 +33,6 @@ class testCreateDB(unittest.TestCase):
         for song in data:
             self.assertTrue(os.path.exists(song['path']))
 
-    @classmethod
-    def tearDownClass(self):
-        os.remove(self.dbName)
-
 if __name__ == '__main__':
     unittest.main()
 

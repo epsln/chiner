@@ -7,7 +7,7 @@ import configparser
 debugFlag = False 
 
 def findClosest(currentTrack, data, alreadySeen):
-    minDist = 10000000000
+    minDist = 10000000
     for track in data:
         if track['path'] == currentTrack['path']: #skip if is the same as current
             continue #Redo it via unique id or somethin
@@ -40,6 +40,7 @@ def main():
     pName = config.get('Playlist', 'name')
     numTracks = int(config.get('Playlist', 'duration'))
 
+
     data = loadData(dbName)
     currentTrack = random.choice(data)
     alreadySeen = []
@@ -48,6 +49,7 @@ def main():
             currentTrack = findClosest(currentTrack, data, alreadySeen)
             alreadySeen.append(currentTrack)
             playlistFile.write(currentTrack['path'] + "\n")
+            #Empty already seen sometimes
 
 if __name__ == "__main__":
     main()
