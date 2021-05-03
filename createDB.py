@@ -6,12 +6,12 @@ import librosa
 from skimage import util
 import sys
 import json 
-
+from tinydb import TinyDB, Query
 import configparser
 
 from utils.audioTools import getSpectro
 
-debugFlag = True
+debugFlag = False 
 
 def root_mean_squared_error(y_true, y_pred):
             return K.sqrt(K.mean(K.square(y_pred - y_true))) 
@@ -25,6 +25,14 @@ def getDanceability(times, bpm):
             danceability += bpm * val 
     return danceability 
 
+def songAlreadyExist(songPath, songDB):
+    songQuery = Query()
+    a = songDB.search(songQuery.path == songPath)
+    if songDB.search(songQuery.path == songPath):
+        return True
+    else:
+        return False
+
 def main():
     config = configparser.ConfigParser()
     if debugFlag == True:
@@ -37,24 +45,23 @@ def main():
     fftLength = int(config.get('Dataset', 'fftLength'))
     nFreq = int(config.get('Dataset', 'nFreq')) 
     numFeatures = int(config.get('Dataset', 'numFeatures'))
-    dbName = config.get('Database', 'name')
+    dbName = config.get('Database', 'name') + ".json"
     searchDir = config.get('Database', 'searchDir') 
     saveDir = config.get('Database', 'directory') 
 
     model = keras.models.load_model('models/' + modelName, custom_objects={'root_mean_squared_error': root_mean_squared_error})
-    model.summary()
 
     musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk(searchDir) for name in files] 
-
-    outArr = []
-
+	
+    songDB = TinyDB(os.path.join(saveDir, dbName))	
     jsonFile = open(saveDir + dbName + '.json', 'w+')
+    #TODO: Add option to restart from stop point if catch interupt
     for i, song in enumerate(musicFiles):
         if i > 3 and debugFlag == True:
             break
         print("Analyzing " +os.path.basename(song))
-        if os.stat("test.json").st_size > 0 and song in next((songAnalyzed for songAnalyzed in jsonFile if songAnalyzed["path"] == song), None) is not None:
-             #If the song has already been analyzed, don't do it again
+        if songAlreadyExist(os.path.abspath(song), songDB) == True:
+            print(song + " already exist in db, skipping")
             continue
 
         audioData, sr = librosa.load(song, sr=None) 
@@ -68,15 +75,11 @@ def main():
         times = librosa.times_like(onset_env, sr=sr)
         danceability = getDanceability(times, bpm) 
 
-        row = {"path": os.path.abspath(song),
+        songDB.insert({"path": os.path.abspath(song),
                 "bpm": bpm,
                 "danceability": danceability,
-               "embed": embed.tolist()}
-        outArr.append(row)
-
+               "embed": embed.tolist()})
         print("[",i + 1,"/",len(musicFiles), "]")
-
-    json.dump(outArr, jsonFile)
 
 if __name__ == "__main__":
     main()
