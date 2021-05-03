@@ -8,4 +8,4 @@ ideas.md
 models/
 oldDS/
 results.txt
-test.json
+*.json
