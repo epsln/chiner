@@ -45,7 +45,7 @@ def main():
     fftLength = int(config.get('Dataset', 'fftLength'))
     nFreq = int(config.get('Dataset', 'nFreq')) 
     numFeatures = int(config.get('Dataset', 'numFeatures'))
-    dbName = config.get('Database', 'name') + ".json"
+    dbName = config.get('Database', 'name')
     searchDir = config.get('Database', 'searchDir') 
     saveDir = config.get('Database', 'directory') 
 
@@ -54,7 +54,6 @@ def main():
     musicFiles = [os.path.join(path, name) for path, subdirs, files in os.walk(searchDir) for name in files] 
 	
     songDB = TinyDB(os.path.join(saveDir, dbName))	
-    jsonFile = open(saveDir + dbName + '.json', 'w+')
     #TODO: Add option to restart from stop point if catch interupt
     for i, song in enumerate(musicFiles):
         if i > 3 and debugFlag == True:

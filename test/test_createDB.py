@@ -1,10 +1,10 @@
 import unittest
 import random
 import os
-import numpy as np
 import shutil
 import json 
 import configparser
+import tinydb
 
 import createDB 
 
@@ -15,7 +15,10 @@ class testCreateDB(unittest.TestCase):
     def setUpClass(self):
         self.config = configparser.ConfigParser()
         self.config.read(r'configTest.cfg')
-        self.dbName = self.config.get('Database', 'name') + ".json"
+        self.dbName = self.config.get('Database', 'name')
+        self.dbDir = self.config.get('Database', 'directory')
+        self.dbName = os.path.join(self.dbDir, self.dbName)
+        self.db = tinydb.TinyDB(self.dbName)
 
         createDB.debugFlag = True
         createDB.main()
@@ -27,10 +30,7 @@ class testCreateDB(unittest.TestCase):
         self.assertFalse(os.stat(self.dbName).st_size == 0)
 
     def test_canReadSongs(self):
-        with open(self.dbName) as jsonFile:
-            data = json.load(jsonFile)
-        jsonFile.close()
-        for song in data:
+        for song in self.db.all():
             self.assertTrue(os.path.exists(song['path']))
 
 if __name__ == '__main__':
