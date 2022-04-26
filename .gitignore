@@ -9,3 +9,5 @@ models/
 oldDS/
 results.txt
 *.json
+*.swp
+*.swo
