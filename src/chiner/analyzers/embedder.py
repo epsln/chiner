@@ -3,7 +3,7 @@ import numpy as np
 import scipy.io.wavfile
 
 class EmbedderAnalyzer(MusicAnalyzer):
-    _METRIC_NAME = "embedding"
+    _FEATURE_NAME = "embedding"
     def __init__(
             self,
             model,
