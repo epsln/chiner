@@ -1,8 +1,11 @@
 import librosa 
 import numpy as np
 import scipy.io.wavfile
+import torch
 
-class EmbedderAnalyzer(MusicAnalyzer):
+from .music_analyzer import MusicAnalyzer
+
+class EmbedderAnalyzer():
     _FEATURE_NAME = "embedding"
     def __init__(
             self,
