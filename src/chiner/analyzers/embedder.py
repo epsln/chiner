@@ -1,3 +1,4 @@
+import base64
 import librosa 
 import numpy as np
 import scipy.io.wavfile
@@ -15,10 +16,11 @@ class EmbedderAnalyzer():
         model = model
         fft_length = fft_length
 
-    def _preprocess(self, song):
-        #Get a sprectrogram out of a mp3
-        audio_data, _ = librosa.load(song, sr=None) 
+    def load_song(self, song_filename):
+        audio_data, _ = librosa.load(song_filename)
         audio_data = librosa.util.normalize(audio_data)
+
+    def _preprocess(self, audio_data):
         stft = np.abs(librosa.core.stft(audio_data)) ** 2 
 
         #Mel spectrogram 
@@ -59,11 +61,14 @@ class EmbedderAnalyzer():
     def _analyze(self, S):
         return self.model.predict(S).flatten()
 
+    def _postprocess(self, embedding):
+        return base64.b64encode(embedding)
+
     @classmethod
     def from_config(cls,
             config):
         model = torch.nn.Module()
-        model.load_state_dict(config['embedder']['path'])
+        model.load_state_dict(torch.load(config['embedder']['path']))
         model.eval()
 
         fft_length = config['embedder']['fft_length']
