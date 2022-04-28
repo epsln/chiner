@@ -3,7 +3,7 @@ import os
 import configparser
 import sqlite3
 
-from chiner import EmbedderAnalyzer
+from chiner.analyzers import EmbedderAnalyzer
 
 def main():
     config = configparser.ConfigParser()
@@ -22,7 +22,6 @@ def main():
             (path text, embed text)''')
 
     for i, song in enumerate(music_files):
-
         embed = embedder.process(song)
         
         values  = "'" + os.path.abspath(song) + "'" 
