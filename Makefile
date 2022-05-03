@@ -9,8 +9,8 @@
 
 test: .check-venv
 	@echo "Running tests for chiner."
-	@python -m unittest discover -s src/tests/analyzers/ -p *_test.py
-	@python -m unittest discover -s src/tests/database/ -p *_test.py
+	@python -m unittest discover -s src/tests/ -p *_test.py
+	@python -m unittest discover -s src/tests/ -p *_test.py
 
 lint: .check-venv
 	@echo "Running linter for chiner."
