@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-from DatabaseFormatter import DatabaseFormatter
+from src.chiner.database import DatabaseFormatter
 
 class DatabaseUpdater():
     ANALYZERS = []
