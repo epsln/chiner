@@ -10,7 +10,7 @@ class TestDatabaseFormatter(unittest.TestCase):
 
     def test_init_fail(self):
         scheme = "notadict"
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AssertionError):
             db = DatabaseFormatter(scheme)
 
     def test_from_file(self):
