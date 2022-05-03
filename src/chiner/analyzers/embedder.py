@@ -12,9 +12,10 @@ class EmbedderAnalyzer():
             self,
             model,
             fft_length):
+
         super().__init__()
-        model = model
-        fft_length = fft_length
+        self.model = model
+        self.fft_length = fft_length
 
     def load_song(self, song_filename):
         audio_data, _ = librosa.load(song_filename)
