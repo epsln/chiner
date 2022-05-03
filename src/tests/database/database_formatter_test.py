@@ -6,7 +6,7 @@ from src.chiner.database import DatabaseFormatter
 class TestDatabaseFormatter(unittest.TestCase):
     def test_init(self):
         test_scheme = {"test": {"field1": 1, "field2": 2}} 
-        db = DatabaseFormatter(self.test_scheme)
+        db = DatabaseFormatter(test_scheme)
 
     def test_init_fail(self):
         scheme = "notadict"
