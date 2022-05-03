@@ -9,7 +9,7 @@ class DatabaseFormatter:
 
     def  __init__(self, tables_scheme):
         super().__init__()
-        assert tables_scheme is dict
+        assert type(tables_scheme) is dict
         self.tables_scheme = tables_scheme
 
     @classmethod
