@@ -6,7 +6,7 @@ import torch
 from src.chiner.analyzers import EmbedderAnalyzer
 
 
-class TestImageAnalyzer(unittest.TestCase):
+class TestEmbedderAnalyzer(unittest.TestCase):
     def test_init(self):
         embedder = EmbedderAnalyzer(MagicMock(spec = torch.nn.Module), 128) 
 
