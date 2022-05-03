@@ -9,6 +9,7 @@ class DatabaseFormatter:
 
     def  __init__(self, tables_scheme):
         super().__init__()
+        assert tables_scheme is dict
         self.tables_scheme = tables_scheme
 
     @classmethod
@@ -48,6 +49,7 @@ class DatabaseFormatter:
         out_command = "INSERT INTO " + table_name \
             + " VALUES (" 
 
+        #Should first check if the dict is valid and correspond to the scheme
         for item in val.keys():
             out_command += item
 
