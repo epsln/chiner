@@ -1,5 +1,6 @@
-import sqlite3
 import os
+import sqlite3
+import time
 
 from src.chiner.database import DatabaseFormatter
 
@@ -22,9 +23,7 @@ class DatabaseUpdater():
         if self._check_table_exist() is False:
             self._init_db()
 
-    def add_analyzer(self, new_analyzer):
-        self.ANALYZERS.append(new_analyzer)
-
+    #TODO: Implement me
     def _check_table_exist(self):
         pass
 
@@ -34,7 +33,7 @@ class DatabaseUpdater():
         (should be a dict with a metric_name: value)of each analyzer and 
         building a table using this
         """
-        #TODO: actually implement it
+        #TODO: Implement me 
         for table in self.formatter.get_insert_tables():
             self.db_cur.execute(table_command)
 
@@ -45,11 +44,13 @@ class DatabaseUpdater():
         else:
             return False
 
+    #TODO: Implement me
     def _check_analyzed(self, song_filename):
         pass
-
+    
     def _write_to_analyzer_db(self, song_filename):
         values  = "'" + os.path.abspath(song_filename) + "'" 
+        values += "'" + str(time.time()) + "'"
         self.db_cur.execute("INSERT INTO songs_to_analyze" + \
                 "VALUES (" + values + ")") 
 
@@ -57,15 +58,22 @@ class DatabaseUpdater():
         """get all files in directory, check if they are of the correct
         filetype, check wether they are already analyzed, and update the db
         """
-
+        #Should probably not be the job of db_updater to get list of file
         music_files = [os.path.join(path, name) for path, subdirs, files in \
             os.walk(self.music_folder) for name in files]
         for song in music_files:
             if self._check_filetype(song):
-                self._write_to_db(song)
+                self._write_to_analyzer_db(song)
 
     def _remove_song_filelist(self, song_filename):
         pass
+
+    def get_song_to_analyze(self):
+        song_filename = self.db_cur.execute('\
+            SELECT * FROM songs_to_analyze ORDER BY date_added')
+
+        while song_filename:
+            yield song_filename.pop()
 
     def add_analyzed_song(self, analyzed_song):
         if validator.is_song_valid(analyzed_song) == True:
